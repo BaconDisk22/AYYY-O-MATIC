@@ -6,7 +6,7 @@ import subprocess
 import runpy
 import glob
 from pathlib import Path
-from PySide6.QtCore import QProcess, Qt
+from PySide6.QtCore import QProcess, Qt, QTimer
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
     QLabel, QPushButton, QPlainTextEdit, QHBoxLayout, QSystemTrayIcon, QMenu,
@@ -159,6 +159,37 @@ if __name__ == "__main__":
         runpy.run_path(str(ROOT / "mesh_bot.py"), run_name="__main__")
         sys.exit(0)
     app = QApplication(sys.argv)
+    demo = "--demo" in sys.argv or "--demo-screenshot" in sys.argv
     app.setQuitOnLastWindowClosed(False)
-    window = Dashboard(); window.show()
+    window = Dashboard()
+    if demo:
+        window.setWindowTitle("AYYY-O-MATIC — DEMO / SAMPLE DATA")
+        window.status.setText("🟡 DEMO MODE — No radio connected")
+        window.radio_ports.clear()
+        window.radio_ports.addItem("/dev/cu.usbserial-DEMO (sample)")
+        window.log.clear()
+        for line in (
+            "[DEMO] Welcome to the Garden State Mesh!",
+            "[DEMO] 10:15 Node NJ-DINER joined the mesh",
+            "[DEMO] 10:16 Message from NJ-SHORE: AYYY! Signal's good.",
+            "[DEMO] 10:17 Node NJ-PARKWAY battery: 87%",
+            "[DEMO] 10:18 Radio link: simulated, no hardware required",
+            "[DEMO] This screenshot contains synthetic demonstration data.",
+        ):
+            window.log.appendPlainText(line)
+        window.start_button.setEnabled(False)
+        window.stop_button.setEnabled(False)
+        window.tray.hide() if window.tray else None
+    window.show()
+    if "--demo-screenshot" in sys.argv:
+        index = sys.argv.index("--demo-screenshot")
+        if index + 1 >= len(sys.argv):
+            raise SystemExit("--demo-screenshot requires an output PNG path")
+        output = Path(sys.argv[index + 1]).expanduser().resolve()
+        def capture():
+            output.parent.mkdir(parents=True, exist_ok=True)
+            if not window.grab().save(str(output), "PNG"):
+                raise RuntimeError("Screenshot capture failed")
+            app.quit()
+        QTimer.singleShot(700, capture)
     sys.exit(app.exec())
