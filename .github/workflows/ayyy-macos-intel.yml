@@ -61,6 +61,16 @@ jobs:
             AYYY-O-MATIC-Intel.dmg
             SHA256SUMS.txt
             screenshots/*.png
+      - name: Commit screenshot for README
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add screenshots/ayyy-o-matic-dashboard.png
+          if ! git diff --cached --quiet; then
+            git commit -m "docs: refresh Mac dashboard preview [skip ci]"
+            git push origin HEAD:main
+          fi
       - name: Publish successful builds to GitHub Releases
         if: success() && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         env:
