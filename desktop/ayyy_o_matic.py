@@ -11,6 +11,23 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
     QMessageBox, QStyle)
 
 ROOT = Path(os.environ.get("AYYY_BOT_HOME", Path(__file__).resolve().parent.parent))
+if getattr(sys, "frozen", False):
+    ROOT = Path.home() / "Library" / "Application Support" / "AYYY-O-MATIC"
+    ROOT.mkdir(parents=True, exist_ok=True)
+    from shutil import copy2
+    bundle = Path(getattr(sys, "_MEIPASS", ""))
+    for name in ("mesh_bot.py", "config.template"):
+        if not (ROOT / name).exists() and (bundle / name).exists():
+            copy2(bundle / name, ROOT / name)
+    if not (ROOT / "modules").exists() and (bundle / "modules").exists():
+        from shutil import copytree
+        copytree(bundle / "modules", ROOT / "modules")
+    if not (ROOT / "etc").exists() and (bundle / "etc").exists():
+        from shutil import copytree
+        copytree(bundle / "etc", ROOT / "etc")
+    if not (ROOT / "script").exists() and (bundle / "script").exists():
+        from shutil import copytree
+        copytree(bundle / "script", ROOT / "script")
 GREEN, GOLD, DARK = "#1B5E20", "#F4B400", "#20252B"
 
 class Dashboard(QMainWindow):
