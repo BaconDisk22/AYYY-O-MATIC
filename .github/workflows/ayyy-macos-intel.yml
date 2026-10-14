@@ -23,6 +23,14 @@ jobs:
           python -m pip install -r requirements.txt PySide6 pyinstaller pyserial
       - name: Verify Python source
         run: python -m compileall -q desktop/ayyy_o_matic.py mesh_bot.py modules
+      - name: Capture demonstration screenshot
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          mkdir -p screenshots
+          python desktop/ayyy_o_matic.py --demo-screenshot screenshots/ayyy-o-matic-dashboard.png
+          test -s screenshots/ayyy-o-matic-dashboard.png
+          file screenshots/ayyy-o-matic-dashboard.png | grep PNG
       - name: Package Intel Mac dashboard
         run: |
           pyinstaller --noconfirm --clean --windowed --name AYYY-O-MATIC \
@@ -52,6 +60,7 @@ jobs:
             AYYY-O-MATIC-Intel.zip
             AYYY-O-MATIC-Intel.dmg
             SHA256SUMS.txt
+            screenshots/*.png
       - name: Publish successful builds to GitHub Releases
         if: success() && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         env:
@@ -64,4 +73,4 @@ jobs:
             RELEASE_TAG="preview"
             gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --prerelease --target "$GITHUB_SHA" --title "AYYY-O-MATIC Intel Mac Preview" --notes "Automatically updated build from the main branch. Unsigned development preview."
           fi
-          gh release upload "$RELEASE_TAG" AYYY-O-MATIC-Intel.zip AYYY-O-MATIC-Intel.dmg SHA256SUMS.txt --clobber
+          gh release upload "$RELEASE_TAG" AYYY-O-MATIC-Intel.zip AYYY-O-MATIC-Intel.dmg SHA256SUMS.txt screenshots/*.png --clobber
