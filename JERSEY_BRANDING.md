@@ -1,6 +1,6 @@
-# FUGGEDABOUTIT MESH 🤌📻
+# AYYY-O-MATIC 🤌📻
 
-**What exit? What node? Fuggedaboutit.**
+**What exit? What node? Ayyy, you good?**
 
 A New Jersey-themed fork of Meshing Around, the Meshtastic Python bot for network testing, BBS activities, messaging, weather and alerts. Built on the original project's functionality; this is a branding concept, not a claim that features have been rewritten.
 
@@ -18,7 +18,7 @@ A New Jersey-themed fork of Meshing Around, the Meshtastic Python bot for networ
 ## Jersey-flavored language (optional; not yet wired into the bot)
 
 - Welcome: **Ayy, you good? Welcome to the mesh. What exit?**
-- Ping reply: **PONG. Fuggedaboutit.**
+- Ping reply: **PONG. Ayyy, you good?**
 - Node online: **Tony just pulled onto the Parkway.**
 - Node offline: **Stuck in Turnpike traffic.**
 - Message queued: **Your order's up at the diner.**
