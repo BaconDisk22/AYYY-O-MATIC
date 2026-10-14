@@ -3,12 +3,13 @@
 import os
 import sys
 import subprocess
+import glob
 from pathlib import Path
 from PySide6.QtCore import QProcess, Qt
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
     QLabel, QPushButton, QPlainTextEdit, QHBoxLayout, QSystemTrayIcon, QMenu,
-    QMessageBox, QStyle)
+    QMessageBox, QStyle, QComboBox)
 
 ROOT = Path(os.environ.get("AYYY_BOT_HOME", Path(__file__).resolve().parent.parent))
 if getattr(sys, "frozen", False):
@@ -50,6 +51,14 @@ class Dashboard(QMainWindow):
         title = QLabel("🤌 AYYY-O-MATIC  📻"); title.setStyleSheet(f"font-size:30px;font-weight:bold;color:{GOLD}")
         layout.addWidget(title)
         layout.addWidget(QLabel("What exit? What node? You good?"))
+        self.radio_ports = QComboBox()
+        self.radio_ports.setEditable(True)
+        layout.addWidget(QLabel("USB radio port"))
+        layout.addWidget(self.radio_ports)
+        refresh = QPushButton("Find USB radios")
+        refresh.clicked.connect(self.detect_radios)
+        layout.addWidget(refresh)
+        self.detect_radios()
         self.status = QLabel("⚪ OFFLINE — Diner's closed, pal."); layout.addWidget(self.status)
         buttons = QHBoxLayout()
         self.start_button = QPushButton("▶ AYYY! START THE BOT")
@@ -74,6 +83,16 @@ class Dashboard(QMainWindow):
             self.tray.show()
         self.quitting = False
 
+    def detect_radios(self):
+        previous = self.radio_ports.currentText()
+        devices = sorted(set(glob.glob("/dev/cu.usb*") + glob.glob("/dev/tty.usb*")))
+        self.radio_ports.clear()
+        self.radio_ports.addItems(devices)
+        if previous and previous not in devices:
+            self.radio_ports.addItem(previous)
+        if previous:
+            self.radio_ports.setCurrentText(previous)
+
     def start_bot(self):
         if self.process.state() != QProcess.NotRunning: return
         script = ROOT / "mesh_bot.py"
@@ -87,7 +106,16 @@ class Dashboard(QMainWindow):
         template = ROOT / "config.template"
         if not config.exists() and template.exists():
             config.write_bytes(template.read_bytes())
-        env = self.process.processEnvironment()
+        selected = self.radio_ports.currentText().strip()
+        if selected and (ROOT / "config.ini").exists():
+            import configparser
+            parser = configparser.ConfigParser()
+            parser.read(ROOT / "config.ini")
+            if parser.has_section("interface"):
+                parser.set("interface", "type", "serial")
+                parser.set("interface", "port", selected)
+                with (ROOT / "config.ini").open("w") as output:
+                    parser.write(output)
         from PySide6.QtCore import QProcessEnvironment
         env = QProcessEnvironment.systemEnvironment()
         env.insert("PYTHONUNBUFFERED", "1")
