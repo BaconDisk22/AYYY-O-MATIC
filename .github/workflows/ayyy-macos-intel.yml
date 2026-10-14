@@ -8,9 +8,12 @@ permissions:
   contents: write
 jobs:
   build:
+    timeout-minutes: 45
     runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -33,6 +36,9 @@ jobs:
             --add-data 'etc:etc' \
             --add-data 'script:script' \
             desktop/ayyy_o_matic.py
+          test -d dist/AYYY-O-MATIC.app
+          test -x dist/AYYY-O-MATIC.app/Contents/MacOS/AYYY-O-MATIC
+          file dist/AYYY-O-MATIC.app/Contents/MacOS/AYYY-O-MATIC | grep x86_64
           ditto -c -k --sequesterRsrc --keepParent dist/AYYY-O-MATIC.app AYYY-O-MATIC-Intel.zip
           mkdir -p dmg-stage
           cp -R dist/AYYY-O-MATIC.app dmg-stage/
@@ -56,8 +62,6 @@ jobs:
             gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --prerelease --generate-notes --target "$GITHUB_SHA"
           else
             RELEASE_TAG="preview"
-            git tag -f "$RELEASE_TAG" "$GITHUB_SHA"
-            git push origin "refs/tags/$RELEASE_TAG" --force
-            gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --prerelease --title "AYYY-O-MATIC Intel Mac Preview" --notes "Automatically updated build from the main branch. Unsigned development preview."
+            gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --prerelease --target "$GITHUB_SHA" --title "AYYY-O-MATIC Intel Mac Preview" --notes "Automatically updated build from the main branch. Unsigned development preview."
           fi
           gh release upload "$RELEASE_TAG" AYYY-O-MATIC-Intel.zip AYYY-O-MATIC-Intel.dmg SHA256SUMS.txt --clobber
