@@ -2,6 +2,7 @@ name: Intel Mac Preview Build
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     tags: ['v*']
 permissions:
   contents: write
@@ -23,6 +24,9 @@ jobs:
         run: |
           pyinstaller --noconfirm --clean --windowed --name AYYY-O-MATIC \
             --target-arch x86_64 \
+            --collect-submodules modules \
+            --collect-submodules meshtastic \
+            --collect-submodules pubsub \
             --add-data 'mesh_bot.py:.' \
             --add-data 'config.template:.' \
             --add-data 'modules:modules' \
