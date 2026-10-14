@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess
+import runpy
 import glob
 from pathlib import Path
 from PySide6.QtCore import QProcess, Qt
@@ -96,7 +97,7 @@ class Dashboard(QMainWindow):
     def start_bot(self):
         if self.process.state() != QProcess.NotRunning: return
         script = ROOT / "mesh_bot.py"
-        python = ROOT / "venv" / "bin" / "python3"
+        python = Path(sys.executable) if getattr(sys, "frozen", False) else ROOT / "venv" / "bin" / "python3"
         if not script.is_file() or not python.is_file():
             QMessageBox.warning(self, "Ayyy! Setup needed",
                 "Bot source or virtual environment missing. Install the original project's dependencies first.\n"
@@ -120,7 +121,7 @@ class Dashboard(QMainWindow):
         env = QProcessEnvironment.systemEnvironment()
         env.insert("PYTHONUNBUFFERED", "1")
         self.process.setProcessEnvironment(env)
-        self.process.start(str(python), [str(script)])
+        self.process.start(str(python), ["--bot"] if getattr(sys, "frozen", False) else [str(script)])
         if not self.process.waitForStarted(3000):
             self.log.appendPlainText("Failed to start bot: " + self.process.errorString())
             return
@@ -152,6 +153,11 @@ class Dashboard(QMainWindow):
         QApplication.instance().quit()
 
 if __name__ == "__main__":
+    if "--bot" in sys.argv:
+        os.chdir(ROOT)
+        sys.argv = [str(ROOT / "mesh_bot.py")]
+        runpy.run_path(str(ROOT / "mesh_bot.py"), run_name="__main__")
+        sys.exit(0)
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     window = Dashboard(); window.show()
