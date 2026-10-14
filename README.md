@@ -12,6 +12,12 @@ Welcome to **AYYY-O-MATIC**, a New Jersey-flavored fork of Meshing Around, the P
 
 > 🤌 "Your message is on the Parkway, pal. We'll get it there."
 
+### 📸 Desktop preview (demonstration data)
+
+![AYYY-O-MATIC Mac dashboard — simulated demonstration data](screenshots/ayyy-o-matic-dashboard.png)
+
+*Automatically captured from the real desktop UI in demo mode after a successful Intel Mac build. The preview uses simulated nodes and messages; no radio is required.*
+
 ### What's on the menu?
 
 - 🍕 **The Diner Booth** — BBS messaging and store-and-forward.
