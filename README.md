@@ -1,3 +1,35 @@
+# 🤌 AYYY-O-MATIC 📻
+
+### *The Garden State's Automated Mesh Wiseguy*
+
+**AYYY! What exit? What node? You good?** 🇮🇹🍕
+
+Welcome to **AYYY-O-MATIC**, a New Jersey-flavored fork of Meshing Around, the Python-powered Meshtastic bot. We're talkin' network tests, BBS messages, weather reports, automation, and more. Like your favorite 24-hour diner, this bot's here when the mesh needs it.
+
+**The Jersey treatment:** Garden State green (`#1B5E20`), Turnpike gold (`#F4B400`), diner cream (`#FFF5DF`), asphalt charcoal (`#20252B`), and Shore blue (`#0077A8`). These are planned UI colors; not all have been implemented yet.
+
+**Mac plans:** An Intel macOS Tahoe desktop dashboard with optional menu bar background mode and a double-clickable `.app`. This is a development goal, **not yet a released Mac app**.
+
+> 🤌 "Your message is on the Parkway, pal. We'll get it there."
+
+### What's on the menu?
+
+- 🍕 **The Diner Booth** — BBS messaging and store-and-forward.
+- 🚗 **The Parkway** — Network monitoring and node activity.
+- 🥓 **Pork Roll Protocol** — Ping, diagnostics, and connectivity tests.
+- 🌊 **Down the Shore Forecast** — Weather information.
+- 👹 **Jersey Devil Watch** — Alerts (emergency messages remain clear and unmodified).
+
+These are **branding concepts** for existing capabilities, not new command names. The commands and setup documentation below remain authoritative until the implementation changes.
+
+### Credit where it's due
+
+Based on [Meshing Around](https://github.com/SpudGunMan/meshing-around). Original author credits, licensing, and existing setup instructions are preserved below. Ayyy, respect the people who built the joint! 🤌
+
+---
+
+## Original project documentation
+
 # Mesh Bot for Network Testing and BBS Activities
 
 Mesh Bot is a feature-rich Python bot designed to enhance your [Meshtastic](https://meshtastic.org/docs/introduction/) network experience. It provides powerful tools for network testing, messaging, games, and more! All via text-based message delivery. Whether you want to test your mesh, send messages, or play games, [mesh_bot.py](mesh_bot.py) has you covered.
