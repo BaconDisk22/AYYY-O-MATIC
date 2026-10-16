@@ -5,12 +5,13 @@ import sys
 import subprocess
 import runpy
 import glob
+import shutil
 from pathlib import Path
-from PySide6.QtCore import QProcess, Qt, QTimer
-from PySide6.QtGui import QAction
+from PySide6.QtCore import QProcess, Qt, QTimer, QUrl
+from PySide6.QtGui import QAction, QDesktopServices
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
     QLabel, QPushButton, QPlainTextEdit, QHBoxLayout, QSystemTrayIcon, QMenu,
-    QMessageBox, QStyle, QComboBox)
+    QMessageBox, QStyle, QComboBox, QFileDialog)
 
 ROOT = Path(os.environ.get("AYYY_BOT_HOME", Path(__file__).resolve().parent.parent))
 if getattr(sys, "frozen", False):
@@ -36,10 +37,14 @@ class Dashboard(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("🤌 AYYY-O-MATIC — The Garden State Mesh")
-        self.resize(850, 580)
+        self.resize(920, 650)
+        self.setMinimumSize(680, 470)
         self.setStyleSheet(f"""QWidget {{background:{DARK};color:#FFF5DF;font-size:14px}}
             QPushButton {{background:{GREEN};border:1px solid {GOLD};padding:11px;border-radius:8px}}
             QPushButton:hover {{background:#2E7D32}}
+            QPushButton:disabled {{background:#424A48;color:#A9B4AE;border-color:#52605A}}
+            QComboBox {{background:#151D1B;border:1px solid #637C68;padding:7px;border-radius:5px}}
+            QLabel#subtitle {{color:#B9D2C0;font-size:12px}}
             QPlainTextEdit {{background:#121619;border:1px solid {GREEN};font-family:monospace}}
         """)
         self.process = QProcess(self)
@@ -51,14 +56,18 @@ class Dashboard(QMainWindow):
         layout = QVBoxLayout(box)
         title = QLabel("🤌 AYYY-O-MATIC  📻"); title.setStyleSheet(f"font-size:30px;font-weight:bold;color:{GOLD}")
         layout.addWidget(title)
-        layout.addWidget(QLabel("What exit? What node? You good?"))
+        subtitle = QLabel("GARDEN STATE MESH CONTROL  •  What exit? What node? You good?")
+        subtitle.setObjectName("subtitle")
+        layout.addWidget(subtitle)
         self.radio_ports = QComboBox()
         self.radio_ports.setEditable(True)
-        layout.addWidget(QLabel("USB radio port"))
-        layout.addWidget(self.radio_ports)
-        refresh = QPushButton("Find USB radios")
+        radio_row = QHBoxLayout()
+        radio_row.addWidget(QLabel("USB RADIO"))
+        radio_row.addWidget(self.radio_ports, 1)
+        refresh = QPushButton("Refresh ports")
         refresh.clicked.connect(self.detect_radios)
-        layout.addWidget(refresh)
+        radio_row.addWidget(refresh)
+        layout.addLayout(radio_row)
         self.detect_radios()
         self.status = QLabel("⚪ OFFLINE — Diner's closed, pal."); layout.addWidget(self.status)
         buttons = QHBoxLayout()
@@ -89,10 +98,33 @@ class Dashboard(QMainWindow):
         devices = sorted(set(glob.glob("/dev/cu.usb*") + glob.glob("/dev/tty.usb*")))
         self.radio_ports.clear()
         self.radio_ports.addItems(devices)
+        if not devices and not previous:
+            self.radio_ports.setPlaceholderText("No USB radio detected")
         if previous and previous not in devices:
             self.radio_ports.addItem(previous)
         if previous:
             self.radio_ports.setCurrentText(previous)
+
+    def export_log(self):
+        filename, _ = QFileDialog.getSaveFileName(
+            self, "Export AYYY-O-MATIC log", str(Path.home() / "AYYY-O-MATIC-log.txt"),
+            "Text files (*.txt)")
+        if filename:
+            try:
+                Path(filename).write_text(self.log.toPlainText() + "\\n", encoding="utf-8")
+            except OSError as exc:
+                QMessageBox.warning(self, "Export failed", str(exc))
+
+    def open_config(self):
+        config = ROOT / "config.ini"
+        if not config.exists():
+            template = ROOT / "config.template"
+            if template.is_file():
+                shutil.copy2(template, config)
+        if config.is_file():
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(config)))
+        else:
+            QMessageBox.warning(self, "Configuration missing", f"No config found in {ROOT}")
 
     def start_bot(self):
         if self.process.state() != QProcess.NotRunning: return
