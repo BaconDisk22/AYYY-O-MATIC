@@ -6,6 +6,7 @@ import subprocess
 import runpy
 import glob
 import shutil
+import time
 from pathlib import Path
 from PySide6.QtCore import QProcess, Qt, QTimer, QUrl
 from PySide6.QtGui import QAction, QDesktopServices
@@ -47,11 +48,16 @@ class Dashboard(QMainWindow):
             QLabel#subtitle {{color:#B9D2C0;font-size:12px}}
             QPlainTextEdit {{background:#121619;border:1px solid {GREEN};font-family:monospace}}
         """)
+        self.started_at = None
+        self.event_count = 0
         self.process = QProcess(self)
         self.process.setWorkingDirectory(str(ROOT))
         self.process.setProcessChannelMode(QProcess.MergedChannels)
         self.process.readyReadStandardOutput.connect(self.read_log)
         self.process.finished.connect(self.stopped)
+        self.uptime_timer = QTimer(self)
+        self.uptime_timer.timeout.connect(self.update_uptime)
+        self.uptime_timer.start(1000)
         box = QWidget(); self.setCentralWidget(box)
         layout = QVBoxLayout(box)
         title = QLabel("🤌 AYYY-O-MATIC  📻"); title.setStyleSheet(f"font-size:30px;font-weight:bold;color:{GOLD}")
@@ -70,6 +76,13 @@ class Dashboard(QMainWindow):
         layout.addLayout(radio_row)
         self.detect_radios()
         self.status = QLabel("⚪ OFFLINE — Diner's closed, pal."); layout.addWidget(self.status)
+        metrics = QHBoxLayout()
+        self.uptime_label = QLabel("UPTIME  00:00:00")
+        self.events_label = QLabel("LOG EVENTS  0")
+        for item in (self.uptime_label, self.events_label):
+            item.setStyleSheet("color:#F4B400;font-weight:600;padding:8px;background:#151D1B;border-radius:5px")
+            metrics.addWidget(item)
+        layout.addLayout(metrics)
         buttons = QHBoxLayout()
         self.start_button = QPushButton("▶ AYYY! START THE BOT")
         self.stop_button = QPushButton("■ CLOSE UP SHOP")
@@ -158,10 +171,16 @@ class Dashboard(QMainWindow):
             self.log.appendPlainText("Failed to start bot: " + self.process.errorString())
             return
         self.status.setText("🟢 RUNNING — We're open for business!")
+        self.started_at = time.monotonic()
         self.start_button.setEnabled(False); self.stop_button.setEnabled(True)
 
     def read_log(self):
-        self.log.appendPlainText(bytes(self.process.readAllStandardOutput()).decode("utf-8", errors="replace").rstrip())
+        chunk = bytes(self.process.readAllStandardOutput()).decode("utf-8", errors="replace")
+        if chunk.strip():
+            self.log.appendPlainText(chunk.rstrip())
+            self.event_count += len(chunk.splitlines())
+            self.events_label.setText(f"LOG EVENTS  {self.event_count}")
+            self.log.document().setMaximumBlockCount(3000)
 
     def stop_bot(self):
         if self.process.state() != QProcess.NotRunning:
@@ -169,7 +188,16 @@ class Dashboard(QMainWindow):
             if not self.process.waitForFinished(2500):
                 self.process.kill(); self.process.waitForFinished(1000)
 
+    def update_uptime(self):
+        if self.started_at is not None and self.process.state() != QProcess.NotRunning:
+            elapsed = int(time.monotonic() - self.started_at)
+            hours, rem = divmod(elapsed, 3600)
+            minutes, seconds = divmod(rem, 60)
+            self.uptime_label.setText(f"UPTIME  {hours:02}:{minutes:02}:{seconds:02}")
+
     def stopped(self, *args):
+        self.started_at = None
+        self.uptime_label.setText("UPTIME  00:00:00")
         self.status.setText("⚪ OFFLINE — Stuck on the Turnpike.")
         self.start_button.setEnabled(True); self.stop_button.setEnabled(False)
 
@@ -197,6 +225,8 @@ if __name__ == "__main__":
     if demo:
         window.setWindowTitle("AYYY-O-MATIC — DEMO / SAMPLE DATA")
         window.status.setText("🟡 DEMO MODE — No radio connected")
+        window.uptime_label.setText("UPTIME  00:18:42")
+        window.events_label.setText("LOG EVENTS  6")
         window.radio_ports.clear()
         window.radio_ports.addItem("/dev/cu.usbserial-DEMO (sample)")
         window.log.clear()
