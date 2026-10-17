@@ -61,6 +61,25 @@ jobs:
             AYYY-O-MATIC-Intel.dmg
             SHA256SUMS.txt
             screenshots/*.png
+      - name: Publish successful builds to GitHub Releases
+        if: success() && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            RELEASE_TAG="$GITHUB_REF_NAME"
+            gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --prerelease --generate-notes --target "$GITHUB_SHA"
+          else
+            if ! gh release view "v0.1.0" >/dev/null 2>&1; then
+              RELEASE_TAG="v0.1.0"
+              gh release create "$RELEASE_TAG" --prerelease --target "$GITHUB_SHA" --title "AYYY-O-MATIC v0.1.0 — Intel Mac Preview" --notes "First Intel Mac preview release. Includes an unsigned DMG installer, ZIP app bundle, SHA256 checksums, and demonstration dashboard screenshot. On macOS, Control-click the app and select Open if Gatekeeper blocks it."
+            else
+              RELEASE_TAG="preview"
+              gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --prerelease --target "$GITHUB_SHA" --title "AYYY-O-MATIC Intel Mac Preview" --notes "Automatically updated unsigned development build from main."
+            fi
+          fi
+          gh release upload "$RELEASE_TAG" AYYY-O-MATIC-Intel.zip AYYY-O-MATIC-Intel.dmg SHA256SUMS.txt screenshots/*.png --clobber
+
       - name: Commit screenshot for README
         if: success() && github.ref == 'refs/heads/main'
         run: |
@@ -71,16 +90,3 @@ jobs:
             git commit -m "docs: refresh Mac dashboard preview [skip ci]"
             git push origin HEAD:main
           fi
-      - name: Publish successful builds to GitHub Releases
-        if: success() && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            RELEASE_TAG="$GITHUB_REF_NAME"
-            gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --prerelease --generate-notes --target "$GITHUB_SHA"
-          else
-            RELEASE_TAG="preview"
-            gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --prerelease --target "$GITHUB_SHA" --title "AYYY-O-MATIC Intel Mac Preview" --notes "Automatically updated build from the main branch. Unsigned development preview."
-          fi
-          gh release upload "$RELEASE_TAG" AYYY-O-MATIC-Intel.zip AYYY-O-MATIC-Intel.dmg SHA256SUMS.txt screenshots/*.png --clobber
