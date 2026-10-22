@@ -1,16 +1,28 @@
-# 🤌 AYYY-O-MATIC Mac dashboard (development preview)
+# 🎃 AYYY-O-MATIC / After Dark
 
-This is the first **working-source implementation** of the New Jersey-themed desktop controller. It starts/stops the existing Meshtastic Python bot, shows live output, and minimizes to the macOS menu bar when available.
+Native Python / Qt desktop controller with a Halloween palette, readable activity console, USB port selector, process status, uptime, and log counters. Bot commands and emergency messages remain unchanged.
 
 ## Intel Mac setup
 
-From the repository root, follow the upstream `INSTALL.md` to install bot dependencies into `venv`, configure `config.ini` from `config.template`, and verify the bot starts. Then install PySide6 into an available Python environment:
+Download an unsigned development preview from [Releases](https://github.com/BaconDisk22/AYYY-O-MATIC/releases). The Intel build workflow creates an x86_64 `.app`, ZIP, DMG and SHA256 checksums. Consult the workflow run for the exact revision that was packaged. Hardware connectivity still requires a configured Meshtastic radio.
 
-```bash
-python3 -m pip install PySide6
-python3 desktop/ayyy_o_matic.py
+For source use, follow [INSTALL.md](../INSTALL.md) to install bot dependencies into `venv`, then:
+
+```sh
+venv/bin/python -m pip install PySide6
+venv/bin/python desktop/ayyy_o_matic.py
 ```
 
-The desktop controller launches `venv/bin/python3 mesh_bot.py` from the repository root. Closing the window hides it in the menu bar when a system tray is available; choose **Quit AYYY-O-MATIC** from the menu bar to stop the bot and exit. Set `AYYY_BOT_HOME` to an absolute checkout path if launching from another location.
+The controller starts `venv/bin/python3 mesh_bot.py` from the repository root. Select or type the USB port, use **Open config** to edit configuration, and choose **Start bot**. **RUNNING** means the process started; it does not assert that a radio is connected. **Export log** saves the displayed console as UTF-8 text. The console retains up to 3,000 blocks.
 
-**Important:** This is source code, **not yet a double-clickable standalone `.app` or `.dmg`**. No Intel Tahoe build has been produced or tested yet. PyInstaller packaging will need an explicit persistent writable bot directory and dependency handling; simply freezing this controller will not bundle the bot's runtime and configuration. Avoid hardcoded Linux CA bundle paths from the upstream shell launcher on macOS. Emergency alerts remain unchanged.
+Closing the window hides it in the menu bar when a tray is available. **Quit AYYY-O-MATIC** stops the process and exits. Set `AYYY_BOT_HOME` to an absolute checkout path for source runs. Packaged apps keep configuration and bot data under `~/Library/Application Support/AYYY-O-MATIC` as before.
+
+## Preview and checks
+
+```sh
+venv/bin/python desktop/ayyy_o_matic.py --demo
+QT_QPA_PLATFORM=offscreen venv/bin/python desktop/ayyy_o_matic.py --demo-screenshot screenshots/ayyy-o-matic-dashboard.png
+QT_QPA_PLATFORM=offscreen venv/bin/python -m unittest discover -s desktop/tests -v
+```
+
+Demo mode shows synthetic data and disables radio, config and process controls. It never starts the bot. Screenshots use the same widgets as the live app, with no additional assets or downloaded fonts required.
