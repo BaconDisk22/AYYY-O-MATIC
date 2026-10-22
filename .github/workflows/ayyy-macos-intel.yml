@@ -28,7 +28,7 @@ jobs:
           python -m pip install -r requirements.txt PySide6 pyinstaller pyserial
       - name: Verify Python source
         run: python -m compileall -q desktop/ayyy_o_matic.py mesh_bot.py modules
-      - name: Capture demonstration screenshot
+      - name: Test Qt dashboard\n        env:\n          QT_QPA_PLATFORM: offscreen\n        run: python -m unittest discover -s desktop/tests -v\n      - name: Capture demonstration screenshot
         env:
           QT_QPA_PLATFORM: offscreen
         run: |

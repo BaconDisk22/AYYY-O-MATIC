@@ -119,11 +119,11 @@ class Dashboard(QMainWindow):
         radio_layout = QVBoxLayout(radio_panel); radio_layout.setContentsMargins(18, 16, 18, 16)
         radio_heading = QLabel("01 / RADIO CONNECTION"); radio_heading.setObjectName("eyebrow")
         radio_layout.addWidget(radio_heading)
-        self.radio_ports = QComboBox(); self.radio_ports.setEditable(True)
+        self.connection_type = QComboBox(); self.connection_type.addItems(["USB / Serial", "Wi-Fi / TCP", "Bluetooth LE"])\n        self.connection_type.currentIndexChanged.connect(self.connection_changed)\n        radio_layout.addWidget(self.connection_type)\n        self.radio_ports = QComboBox(); self.radio_ports.setEditable(True)
         self.radio_ports.setAccessibleName("USB radio port")
         self.radio_ports.setMinimumWidth(160)
         radio_row = QHBoxLayout()
-        radio_label = QLabel("USB port"); radio_label.setBuddy(self.radio_ports)
+        self.radio_label = QLabel("USB port"); self.radio_label.setBuddy(self.radio_ports)\n        radio_label = self.radio_label
         radio_row.addWidget(radio_label); radio_row.addWidget(self.radio_ports, 1)
         self.refresh_button = QPushButton("Refresh")
         self.refresh_button.setToolTip("Scan for connected USB radios")
@@ -177,7 +177,7 @@ class Dashboard(QMainWindow):
         self.status.style().unpolish(self.status)
         self.status.style().polish(self.status)
 
-    def detect_radios(self):
+    def connection_changed(self, *args):\n        mode = self.connection_type.currentIndex()\n        self.radio_label.setText(("USB port", "Host / IP (port 4403)", "BLE address / device ID")[mode])\n        self.refresh_button.setEnabled(mode == 0)\n        self.radio_ports.setPlaceholderText(("Select a USB radio", "meshtastic.local:4403", "Bluetooth device address")[mode])\n        self.radio_ports.clear()\n        if mode == 0:\n            self.detect_radios()\n        else:\n            config = ROOT / "config.ini"\n            if config.exists():\n                import configparser\n                parser = configparser.ConfigParser()\n                parser.read(config)\n                key = ("port", "hostname", "mac")[mode]\n                if parser.get("interface", "type", fallback="") == ("serial", "tcp", "ble")[mode]:\n                    self.radio_ports.setCurrentText(parser.get("interface", key, fallback=""))\n\n    def detect_radios(self):
         previous = self.radio_ports.currentText()
         devices = sorted(set(glob.glob("/dev/cu.usb*") + glob.glob("/dev/tty.usb*")))
         self.radio_ports.clear()
@@ -224,7 +224,7 @@ class Dashboard(QMainWindow):
         if not config.exists() and template.exists():
             config.write_bytes(template.read_bytes())
         selected = self.radio_ports.currentText().strip()
-        if selected and (ROOT / "config.ini").exists():
+        if (ROOT / "config.ini").exists():
             import configparser
             parser = configparser.ConfigParser()
             parser.read(ROOT / "config.ini")
@@ -312,7 +312,7 @@ if __name__ == "__main__":
         ):
             window.log.appendPlainText(line)
         window.footer.setText("DEMO / Synthetic data. No radio connected. No bot process running.")
-        window.radio_ports.setEnabled(False)
+        window.radio_ports.setEnabled(False)\n        window.connection_type.setEnabled(False)
         window.refresh_button.setEnabled(False)
         window.config_button.setEnabled(False)
         window.start_button.setEnabled(False)
