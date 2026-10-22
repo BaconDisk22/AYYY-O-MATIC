@@ -26,3 +26,7 @@ QT_QPA_PLATFORM=offscreen venv/bin/python -m unittest discover -s desktop/tests 
 ```
 
 Demo mode shows synthetic data and disables radio, config and process controls. It never starts the bot. Screenshots use the same widgets as the live app, with no additional assets or downloaded fonts required.
+
+## Wireless connections
+
+Choose **USB / Serial**, **Wi-Fi / TCP**, or **Bluetooth LE** in the dashboard. For TCP, enter a reachable Meshtastic host such as `meshtastic.local:4403` (or its IP address). For BLE, enter the device identifier accepted by the installed Meshtastic Python library; macOS may require Bluetooth permission. Connection availability depends on the radio firmware and hardware. The selection updates the existing `[interface]` configuration without overwriting other settings. A RUNNING process is not proof of a successful radio connection; check the activity log.
