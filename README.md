@@ -1,22 +1,19 @@
-# 🤌 AYYY-O-MATIC 📻
+# 🎃 AYYY-O-MATIC / After Dark
 
-### *The Garden State's Automated Mesh Wiseguy*
+### The Garden State mesh, dressed for midnight.
 
-**AYYY! What exit? What node? You good?** 🇮🇹🍕
+A Halloween desktop controller for the Meshing Around Meshtastic bot. Start and stop the bot, select a USB radio, watch session uptime and live output, open configuration, and export logs from one native dashboard.
 
-Welcome to **AYYY-O-MATIC**, a New Jersey-flavored fork of Meshing Around, the Python-powered Meshtastic bot. We're talkin' network tests, BBS messages, weather reports, automation, and more. Like your favorite 24-hour diner, this bot's here when the mesh needs it.
+**Pumpkin orange · Midnight black · Eerie purple · Acid green**
+Orange marks the primary action, purple organizes the dashboard, and green marks running status and session metrics. Explicit status labels keep offline, running, failed-start, and demo states understandable without relying on color.
 
-**The Jersey treatment:** Garden State green (`#1B5E20`), Turnpike gold (`#F4B400`), diner cream (`#FFF5DF`), asphalt charcoal (`#20252B`), and Shore blue (`#0077A8`). These are planned UI colors; not all have been implemented yet.
+[Desktop setup](desktop/README.md) · [Intel Mac releases](https://github.com/BaconDisk22/AYYY-O-MATIC/releases) · [Build status](https://github.com/BaconDisk22/AYYY-O-MATIC/actions/workflows/ayyy-macos-intel.yml) · [Theme guide](JERSEY_BRANDING.md)
 
-**Mac plans:** An Intel macOS Tahoe desktop dashboard with optional menu bar background mode and a double-clickable `.app`. This is a development goal, **not yet a released Mac app**.
+### Desktop preview — demonstration data
 
-> 🤌 "Your message is on the Parkway, pal. We'll get it there."
+![Halloween dashboard with synthetic sample data](screenshots/ayyy-o-matic-dashboard.png)
 
-### 📸 Desktop preview (demonstration data)
-
-![AYYY-O-MATIC Mac dashboard — simulated demonstration data](screenshots/ayyy-o-matic-dashboard.png)
-
-*Automatically captured from the real desktop UI in demo mode after a successful Intel Mac build. The preview uses simulated nodes and messages; no radio is required.*
+*Captured from the actual Qt dashboard using `--demo-screenshot`. Nodes, messages and metrics are synthetic; no radio or bot process runs in demo mode. The Intel build workflow regenerates this preview and packages the app as a ZIP and DMG. Builds are unsigned development previews.*
 
 ### What's on the menu?
 
